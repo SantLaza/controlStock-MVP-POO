@@ -117,7 +117,7 @@ CREATE TABLE STOCK (
 
 -- ---------------------------------------------------------------------
 -- MOVIMIENTO_STOCK
-poo_java
+
 CREATE TABLE MOVIMIENTO_STOCK (
     idMovimiento           INT UNSIGNED NOT NULL AUTO_INCREMENT,
     idProducto             INT UNSIGNED NOT NULL,

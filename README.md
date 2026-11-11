@@ -1,14 +1,12 @@
 # controlStock — MVP para Programación Orientada a Objetos
 
-Producto mínimo de un sistema de control de stock para una PYME, desarrollado para la entrega de la materia Programación Orientada a Objetos (UNPSJB, Sede Esquel) del **18/11/2026**.
 
 **Autores:** Santiago Lazarte y Joaquin Curihuala
 
-> Este repositorio contiene solo la entrega de POO. Comparte el dominio y la documentación de referencia con el producto controlStock, pero es un desarrollo independiente: el producto se desarrolla y documenta en un repositorio aparte. El modelo de datos de este MVP es un subconjunto del modelo completo (ver [`docs/explicacion_DER_MVP.md`](docs/explicacion_DER_MVP.md)).
+> Este repositorio contiene solo la entrega de POO. Comparte el dominio y la documentación de referencia con el producto controlStock, pero es un desarrollo independiente: el producto se desarrolla y documenta en un repositorio aparte. El modelo de datos de este MVP es un subconjunto del modelo completo.
 
 ## Alcance previsto
 
-El alcance final se fija el 08/11/2026. Cada bloque se marca cuando está terminado.
 
 **Imprescindible**
 
@@ -29,6 +27,19 @@ El alcance final se fija el 08/11/2026. Cada bloque se marca cuando está termin
 - Java 17 y Maven
 - MySQL 8.0.16 o superior, con acceso por JDBC
 - Interfaz de consola
+
+## Instalación de la base
+
+1. Comprobá que el servidor está en modo estricto: `SELECT @@GLOBAL.sql_mode;` tiene que incluir `STRICT_TRANS_TABLES`
+2. Con una cuenta administradora (por ejemplo, `root`), ejecutá en orden los scripts de `sql/`:
+   - `01_schema.sql`: crea la base `controlstock_mvp` y sus tablas.
+   - `02_datos_prueba.sql`: carga el administrador y los datos iniciales (pendiente).
+   - `03_usuario_app.sql`: crea la cuenta `controlstock_app` que usa la aplicación y le deja exactamente sus permisos (si la cuenta ya existía con permisos de más, se los quita).
+
+3. Pone tu contraseña a la cuenta de la aplicación con una consulta que **no** se guarde en el repositorio:
+   `ALTER USER 'controlstock_app'@'localhost' IDENTIFIED BY 'tu_contraseña';`
+   y escribí esa contraseña en tu `db.properties` local, que está en el `.gitignore` y no se versiona. Si la cuenta ya existía, `03_usuario_app.sql` no le cambia la contraseña.
+   ```
 
 ## Estructura del repositorio
 

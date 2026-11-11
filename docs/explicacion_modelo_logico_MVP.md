@@ -109,7 +109,7 @@ El formato de la cátedra muestra tablas, claves primarias y claves foráneas. L
 - **Claves alternativas (`UNIQUE`):** `codigoProducto`, `nombreCategoria`, `nombreDeposito` y `nombreUsuario`.
 - **Restricciones `CHECK` y reglas de negocio:** cantidades y mínimos válidos, motivo no vacío, tipo de movimiento limitado a ajustes en el MVP, stock nunca negativo, etc. Están en la sección 5 de la explicación del DER.
 
-## 7. También ya quedo hecho:
+## 7. También ya quedó hecho:
 
 1. **Modelo relacional:** especificación de dominios de las 7 tablas, a partir de este esquema y de las restricciones del DER.
 2. **`sql/01_schema.sql`:** crear las tablas en el orden del camino referencial (primero las referenciadas): CATEGORIA, DEPOSITO, USUARIO, PRODUCTO, STOCK, MOVIMIENTO_STOCK y AUDITORIA.

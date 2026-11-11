@@ -36,7 +36,7 @@
 --
 --   ALTER USER 'controlstock_app'@'localhost' IDENTIFIED BY 'tu_contraseña';
 --
--- y ponga esa contraseña en su config.properties local (que tampoco se
+-- y ponga esa contraseña en su db.properties local (que tampoco se
 -- versiona).
 -- =====================================================================
 

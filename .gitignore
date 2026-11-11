@@ -29,3 +29,12 @@ replay_pid*
 
 # Configuración local con credenciales
 db.properties
+
+# Directorios de IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+*.swp

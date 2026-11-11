@@ -166,9 +166,9 @@ Los scripts se ejecutan con una cuenta administradora y con detención ante el p
 | Fechas | Hito | Estado |
 |---|---|---|
 | **26/10–05/11** | Documentación alineada; DER, modelo lógico y modelo relacional; scripts `00`, `01` y `03` probados | Hecho |
-| **05–07/11** | Base de código: Maven, conexión, configuración, contratos compartidos, menú principal y acceso; `02_datos_prueba.sql`; instalación desde cero en las dos computadoras. Al quedar integrada, empiezan maestros y stock en paralelo | Pendiente |
+| **05–07/11** | Base de código: Maven, conexión, configuración, contratos compartidos, menú principal y acceso; `02_datos_prueba.sql`; instalación desde cero en las dos computadoras. Al quedar integrada, empiezan maestros y stock en paralelo | Hecho (11/11) |
 | **08/11** | Fijar el alcance final y registrar pendientes | Pendiente |
-| **08–11/11** | Integrar maestros, stock y consultas imprescindibles, y los bloques seleccionados; ejecutar una primera secuencia completa | Pendiente |
+| **08–11/11** | Integrar maestros, stock y consultas imprescindibles, y los bloques seleccionados; ejecutar una primera secuencia completa | En curso |
 | **12–13/11** | Cerrar pruebas y ejecutar la demo completa | Pendiente |
 | **14–17/11** | Corregir defectos, comprobar instalación y ensayar la presentación | Pendiente |
 | **18/11** | Entregar la versión etiquetada `v0.1-mvp` | Pendiente |
@@ -216,18 +216,16 @@ Los bloques importantes incluidos tendrán pruebas de su recorrido principal y s
 
 Para ensayar la demo desde cero se ejecuta antes `00_reiniciar.sql`. El guion final omitirá los bloques que queden pendientes el 08/11.
 
-## 10. Decisiones pendientes
+## 10. Decisiones resueltas
 
-Se cierran al empezar la base de código, porque afectan a los dos:
+Se cerraron al empezar la base de código (11/11/2026):
 
-| Decisión | Opciones | Afecta a |
+| Decisión | Resolución | Afecta a |
 |---|---|---|
-| Quién es el integrante A y quién el B | Según disponibilidad | Reparto (6.2) |
-| Algoritmo de hash de contraseñas | BCrypt o PBKDF2 | `02_datos_prueba.sql` y el acceso |
-| Nombre del paquete base | `controlstock` o `ar.edu.unpsjb.controlstock` | Todos los archivos Java |
-| Carpetas del IDE a ignorar | Según el IDE de cada uno | `.gitignore` |
-
-Si todavía no lo hicieron, cada integrante indica cuántas horas semanales puede dedicar hasta el 18/11, para contrastarlo con el calendario.
+| Quién es el integrante A y quién el B | Joaquín es A (maestros), Santiago es B (stock) | Reparto (6.2) |
+| Algoritmo de hash de contraseñas | BCrypt (jBCrypt 0.4), costo 10 | `02_datos_prueba.sql` y el acceso |
+| Nombre del paquete base | `controlstock` | Todos los archivos Java |
+| Carpetas del IDE a ignorar | `.idea/`, `.vscode/`, `*.iml`, `.classpath`, `.project`, `.settings/` | `.gitignore` |
 
 ## 11. Entregables y finalización
 
@@ -246,3 +244,4 @@ El MVP estará terminado cuando el núcleo imprescindible esté integrado en `ma
 | Fecha | Cambios |
 |---|---|
 | 05/11/2026 | Se trabaja en una sola rama (`main`) en lugar de ramas con pull requests (2 y 6). Se agregan los acuerdos de concurrencia, conexión y credenciales (5), la organización de archivos y el reparto por módulo (6), las pruebas de concurrencia y de modo estricto (8) y las decisiones pendientes (10). Se actualiza el calendario con lo hecho hasta el 05/11 (7). Se suman el modelo relacional y los scripts a los entregables (11). |
+| 11/11/2026 | Se integra la base de código: `pom.xml` (Java 17, Maven, MySQL Connector/J, jBCrypt, JUnit 5), capa de modelo (7 clases, 5 enumerados), capa DAO (7 interfaces, implementación JDBC de Usuario), capa de servicio (`ReglaNegocioException` con traducción de errores MySQL y `SesionServicio`), capa UI (`MenuPrincipal` completo, cascarones de `MenuMaestros`, `MenuStock` y `MenuConsultas`), capa util (`Configuracion` y `ConexionDB` con verificación de modo estricto), `Main`, `db.properties.example` y `02_datos_prueba.sql` (administrador y Depósito Central). Se cierran las decisiones pendientes (10): paquete `controlstock`, BCrypt, reparto A/B. Se corrige `poo_java` en `01_schema.sql`, `config.properties` en `03_usuario_app.sql` y la doble extensión de `modelo_logico_MVP.png`. Se documenta la base de código (`base_codigo.md`) y los planes de implementación de maestros y stock. Se actualiza el README y el `.gitignore`. |

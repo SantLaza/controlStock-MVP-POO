@@ -24,6 +24,37 @@
 | `ui/MenuMaestros.java` | Reemplazar el cascarón vacío por el menú completo con submenús |
 | `Main.java` | Crear los DAOs, servicios y pasarlos a `MenuMaestros` |
 
+## 2.1 Estado de los maestros: `EntidadMaestra`
+
+`Categoria`, `Producto` y `Deposito` extienden la clase abstracta `EntidadMaestra`, que guarda el estado. Ya no existen `getEstadoCategoria()` / `setEstadoCategoria()` (ni los de Producto y Depósito):
+
+| Método | Uso |
+|---|---|
+| `getEstado()` | Leer el estado (para el `INSERT`/`UPDATE`: `getEstado().getValor()`) |
+| `estaActivo()` | Validar en el servicio que la entidad esté activa |
+| `darDeBaja()` | Pasar a inactivo. Lanza `IllegalStateException` si ya estaba inactiva |
+| `reactivar()` | Pasar a activo (reactivación es "si alcanza"; no hace falta en el menú) |
+| `getNombre()` | Nombre de la entidad, para mensajes y listados |
+
+No hay setter público de estado, a propósito: la única forma de cambiarlo es con `darDeBaja()` o `reactivar()`. Los nombres de las columnas en SQL **no cambian** (`estadoCategoria`, `estadoProducto`, `estadoDeposito`).
+
+**Mapeo en el DAO.** Toda entidad nace activa. Al leer una fila, si la columna dice inactivo se aplica la baja:
+
+```java
+Categoria c = new Categoria();
+c.setIdCategoria(rs.getInt("idCategoria"));
+c.setNombreCategoria(rs.getString("nombreCategoria"));
+if (Estado.desdeValor(rs.getString("estadoCategoria")) == Estado.INACTIVO) {
+    c.darDeBaja();
+}
+```
+
+**Baja en el servicio.** Dentro de la transacción, en este orden:
+1. Buscar con bloqueo (`buscarPorIdConBloqueo`). Si no existe o `!estaActivo()`, lanzar `ReglaNegocioException` con el mensaje para el usuario.
+2. Validar las reglas que dependen de otras entidades (productos activos, existencias, último depósito activo).
+3. `entidad.darDeBaja()`.
+4. `dao.actualizar(conn, entidad)` y `commit`.
+
 ---
 
 ## 3. Orden de implementación

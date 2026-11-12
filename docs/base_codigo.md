@@ -9,7 +9,7 @@ La base de código es el conjunto de archivos compartidos que se construyen ante
 
 - **Proyecto Maven** (`pom.xml`) con Java 17, MySQL Connector/J 8.3.0, jBCrypt 0.4 y JUnit 5.10.2.
 - **Configuración** (`db.properties.example`) como plantilla sin contraseña.
-- **Capa modelo** — 7 clases y 5 enumerados que representan el dominio.
+- **Capa modelo** — 7 clases, la clase abstracta `EntidadMaestra` (base de Categoría, Producto y Depósito) y 5 enumerados que representan el dominio.
 - **Capa DAO** — 7 interfaces que definen los contratos de persistencia.
 - **Capa DAO JDBC** — Implementación de `UsuarioJdbcDao` (necesaria para el acceso).
 - **Capa servicio** — `ReglaNegocioException` con traducción de errores MySQL, y `SesionServicio` (inicio y cierre de sesión).
@@ -33,9 +33,10 @@ src/main/java/controlstock/
 │   ├── Accion.java              (enum: alta, modificacion, baja_logica)
 │   ├── EntidadAfectada.java     (enum: categoria, producto, deposito, stock, usuario)
 │   ├── Usuario.java
-│   ├── Categoria.java
-│   ├── Producto.java
-│   ├── Deposito.java
+│   ├── EntidadMaestra.java      (abstracta: estado y baja lógica de los maestros)
+│   ├── Categoria.java           (extends EntidadMaestra)
+│   ├── Producto.java            (extends EntidadMaestra)
+│   ├── Deposito.java            (extends EntidadMaestra)
 │   ├── Stock.java
 │   ├── MovimientoStock.java
 │   └── Auditoria.java

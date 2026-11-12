@@ -63,8 +63,8 @@ habilitar(idProducto, idDeposito)
 | Paso | Detalle |
 |---|---|
 | 1 | Abrir conexión, `setAutoCommit(false)` |
-| 2 | `ProductoDao.buscarPorIdConBloqueo` → verificar que existe y está activo |
-| 3 | `DepositoDao.buscarPorIdConBloqueo` → verificar que existe y está activo |
+| 2 | `ProductoDao.buscarPorIdConBloqueo` → verificar que existe y `estaActivo()` |
+| 3 | `DepositoDao.buscarPorIdConBloqueo` → verificar que existe y `estaActivo()` |
 | 4 | Verificar que no exista ya un Stock para ese par (duplicado) |
 | 5 | `StockDao.insertar` con cantidad 0 y stockMinimo 0 |
 | 6 | Commit |

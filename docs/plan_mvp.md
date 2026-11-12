@@ -67,7 +67,7 @@ Las clases del modelo representarán los conceptos del dominio.
 
 Se entregará un **diagrama de clases consistente con el código**, con atributos relevantes, métodos, asociaciones e interfaces.
 
-Los servicios dependerán de interfaces DAO, permitiendo utilizar implementaciones de prueba en memoria. La herencia y las clases abstractas se justificarán según las relaciones del dominio y la consigna de la materia.
+Los servicios dependerán de interfaces DAO, permitiendo utilizar implementaciones de prueba en memoria. La herencia se usa donde el dominio la justifica: Categoría, Producto y Depósito extienden la clase abstracta `EntidadMaestra`, porque los tres datos maestros comparten el mismo ciclo de vida (nacen activos y se dan de baja de forma lógica). La entidad controla su propio cambio de estado (`darDeBaja()`, `reactivar()`, `estaActivo()`); las reglas que involucran otras entidades, como no dar de baja un depósito con existencias, las valida el servicio. `Usuario` también tiene estado, pero no es un dato maestro ni tiene ABM en el MVP, así que queda fuera de la jerarquía.
 
 Cada módulo tendrá su propio submenú (`MenuMaestros`, `MenuStock`, `MenuConsultas`). El menú principal se arma en la base de código, ya conectado a los tres submenús aunque estén vacíos, para que después nadie necesite modificarlo (sección 6.3).
 

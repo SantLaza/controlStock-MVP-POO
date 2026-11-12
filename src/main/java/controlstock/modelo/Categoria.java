@@ -1,17 +1,15 @@
 package controlstock.modelo;
 
-public class Categoria {
+public class Categoria extends EntidadMaestra {
 
     private int idCategoria;
     private String nombreCategoria;
-    private Estado estadoCategoria;
 
     public Categoria() {
     }
 
     public Categoria(String nombreCategoria) {
         this.nombreCategoria = nombreCategoria;
-        this.estadoCategoria = Estado.ACTIVO;
     }
 
     public int getIdCategoria() {
@@ -30,17 +28,14 @@ public class Categoria {
         this.nombreCategoria = nombreCategoria;
     }
 
-    public Estado getEstadoCategoria() {
-        return estadoCategoria;
-    }
-
-    public void setEstadoCategoria(Estado estadoCategoria) {
-        this.estadoCategoria = estadoCategoria;
+    @Override
+    public String getNombre() {
+        return nombreCategoria;
     }
 
     @Override
     public String toString() {
         return "[" + idCategoria + "] " + nombreCategoria
-                + " (" + estadoCategoria.getValor() + ")";
+                + " (" + getEstado().getValor() + ")";
     }
 }

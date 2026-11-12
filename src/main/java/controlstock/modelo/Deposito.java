@@ -1,11 +1,10 @@
 package controlstock.modelo;
 
-public class Deposito {
+public class Deposito extends EntidadMaestra {
 
     private int idDeposito;
     private String nombreDeposito;
     private String direccion;
-    private Estado estadoDeposito;
 
     public Deposito() {
     }
@@ -13,7 +12,6 @@ public class Deposito {
     public Deposito(String nombreDeposito, String direccion) {
         this.nombreDeposito = nombreDeposito;
         this.direccion = direccion;
-        this.estadoDeposito = Estado.ACTIVO;
     }
 
     public int getIdDeposito() {
@@ -40,18 +38,15 @@ public class Deposito {
         this.direccion = direccion;
     }
 
-    public Estado getEstadoDeposito() {
-        return estadoDeposito;
-    }
-
-    public void setEstadoDeposito(Estado estadoDeposito) {
-        this.estadoDeposito = estadoDeposito;
+    @Override
+    public String getNombre() {
+        return nombreDeposito;
     }
 
     @Override
     public String toString() {
         return "[" + idDeposito + "] " + nombreDeposito
                 + (direccion != null ? " — " + direccion : "")
-                + " (" + estadoDeposito.getValor() + ")";
+                + " (" + getEstado().getValor() + ")";
     }
 }

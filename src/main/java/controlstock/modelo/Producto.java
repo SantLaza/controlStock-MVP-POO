@@ -2,7 +2,7 @@ package controlstock.modelo;
 
 import java.math.BigDecimal;
 
-public class Producto {
+public class Producto extends EntidadMaestra {
 
     private int idProducto;
     private String codigoProducto;
@@ -11,7 +11,6 @@ public class Producto {
     private String descripcion;
     private BigDecimal precioReferenciaCompra;
     private BigDecimal precioReferenciaVenta;
-    private Estado estadoProducto;
 
     public Producto() {
     }
@@ -23,7 +22,6 @@ public class Producto {
         this.nombreProducto = nombreProducto;
         this.precioReferenciaCompra = precioReferenciaCompra;
         this.precioReferenciaVenta = precioReferenciaVenta;
-        this.estadoProducto = Estado.ACTIVO;
     }
 
     public int getIdProducto() {
@@ -82,17 +80,14 @@ public class Producto {
         this.precioReferenciaVenta = precioReferenciaVenta;
     }
 
-    public Estado getEstadoProducto() {
-        return estadoProducto;
-    }
-
-    public void setEstadoProducto(Estado estadoProducto) {
-        this.estadoProducto = estadoProducto;
+    @Override
+    public String getNombre() {
+        return nombreProducto;
     }
 
     @Override
     public String toString() {
         return "[" + codigoProducto + "] " + nombreProducto
-                + " (" + estadoProducto.getValor() + ")";
+                + " (" + getEstado().getValor() + ")";
     }
 }

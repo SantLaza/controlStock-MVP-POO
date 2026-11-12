@@ -96,7 +96,7 @@ ajustarPositivo(idProducto, idDeposito, cantidad, motivo, idUsuario)
 | 1 | Abrir conexión, `setAutoCommit(false)` |
 | 2 | Validar: cantidad > 0, motivo no vacío después de trim |
 | 3 | `StockDao.buscarPorIdsConBloqueo` → verificar que existe (producto habilitado en depósito) |
-| 4 | Sumar la cantidad al saldo: `stock.setCantidad(stock.getCantidad() + cantidad)` |
+| 4 | Sumar la cantidad al saldo: `stock.aumentar(cantidad)` |
 | 5 | `StockDao.actualizar` |
 | 6 | Crear `MovimientoStock` con tipo `AJUSTE_POSITIVO` |
 | 7 | `MovimientoStockDao.insertar` |
@@ -115,7 +115,7 @@ Igual que el positivo, con estas diferencias:
 | Paso | Detalle |
 |---|---|
 | 4 | **Verificar que el saldo alcanza:** `stock.getCantidad() >= cantidad`. Si no alcanza → `ReglaNegocioException("Stock insuficiente. Saldo actual: " + stock.getCantidad())` |
-| 4b | Restar: `stock.setCantidad(stock.getCantidad() - cantidad)` |
+| 4b | Restar: `stock.disminuir(cantidad)` |
 | 6 | Tipo `AJUSTE_NEGATIVO` |
 
 **3.5 Manejo de deadlocks**

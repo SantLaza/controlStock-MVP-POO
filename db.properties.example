@@ -1,0 +1,14 @@
+# Plantilla de configuracion de la conexion a MySQL.
+#
+# 1. Copiar este archivo como db.properties, en la raiz del proyecto
+#    (la aplicacion lo busca en la carpeta desde donde se ejecuta).
+# 2. Completar db.contrasena con la contrasena asignada a controlstock_app
+#    (ALTER USER del README, paso de instalacion de la base).
+#
+# db.properties esta en el .gitignore: nunca se sube al repositorio.
+# Este archivo se lee como ISO-8859-1: evitar acentos y la letra enie
+# en la contrasena.
+
+db.url=jdbc:mysql://localhost:3306/controlstock_mvp
+db.usuario=controlstock_app
+db.contrasena=

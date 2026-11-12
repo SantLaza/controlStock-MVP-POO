@@ -143,6 +143,32 @@ while (true) {
 }
 ```
 
+**3.6 Aviso de stock bajo**
+
+Requisito de la presentación: después de una operación, el programa tiene que avisar si el par producto–depósito quedó con stock bajo (`cantidad < stockMinimo`).
+
+| Decisión | Detalle |
+|---|---|
+| Qué devuelve el servicio | `definirMinimo`, `ajustarPositivo` y `ajustarNegativo` devuelven el `Stock` actualizado (después del commit), en vez de `void` |
+| Quién decide si avisar | El menú: llama a `stock.esBajo()` y, si da `true`, imprime el aviso con `stock.faltante()` |
+| Por qué no lo imprime el servicio | El servicio no escribe en consola; solo la capa `ui` lo hace |
+| Base de datos | Sin cambios: se usa el objeto que el servicio ya tiene en memoria, sin otra consulta |
+
+Cuándo puede aparecer el aviso:
+
+| Operación | Ejemplo |
+|---|---|
+| Ajuste negativo | Saldo 10, mínimo 5, ajuste −7 → saldo 3, faltan 2 |
+| Definir mínimo | Saldo 3, se sube el mínimo de 0 a 5 → faltan 2 (el saldo no cambió, pero ahora está bajo) |
+| Ajuste positivo | Saldo 3, mínimo 10, ajuste +2 → saldo 5, todavía faltan 5 |
+
+Texto del aviso:
+
+```
+Ajuste registrado. Saldo actual: 3.
+⚠ Stock bajo: el mínimo es 5, faltan 2 unidades.
+```
+
 ### Etapa 4 — MenuStock
 
 **Estructura del menú:**
@@ -161,6 +187,7 @@ Para cada opción, el menú debe:
 2. Pedir los datos por consola.
 3. Llamar al servicio.
 4. Mostrar resultado o error.
+5. En las opciones 2, 3 y 4: mostrar el aviso de stock bajo si corresponde (ver 3.6). Conviene un método privado `mostrarAvisoStockBajo(Stock)` que usen las tres opciones.
 
 **Constructor de MenuStock:**
 
@@ -207,6 +234,7 @@ MenuStock menuStock = new MenuStock(scanner, stockServicio, sesionServicio);
 - [ ] Orden de bloqueos: PRODUCTO → DEPOSITO → STOCK (nunca al revés).
 - [ ] Deadlock (error 1213): rollback + un reintento.
 - [ ] Consultas parametrizadas siempre.
+- [ ] Aviso de stock bajo después de definir mínimo y de cada ajuste (se muestra en la presentación).
 
 ## 5. Concurrencia — Casos a probar
 

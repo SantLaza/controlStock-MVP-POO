@@ -20,4 +20,6 @@ public interface ProductoDao {
     List<Producto> listarActivos(Connection conn) throws SQLException;
 
     List<Producto> listarTodos(Connection conn) throws SQLException;
+
+    boolean existeActivoPorCategoria(Connection conn, int idCategoria) throws SQLException;
 }

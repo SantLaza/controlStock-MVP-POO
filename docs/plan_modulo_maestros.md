@@ -255,12 +255,12 @@ MenuMaestros menuMaestros = new MenuMaestros(scanner, categoriaServicio, product
 
 ## 5. Dependencias con el módulo Stock
 
-| Lo que necesito de Santiago | Para qué | Mientras tanto |
+| Lo que necesito de Santiago | Para qué | Estado |
 |---|---|---|
-| `StockJdbcDao.existeConCantidadPositiva()` | Baja de producto | Asumir false (no hay stock cargado) o crear un stub |
-| `StockJdbcDao.existeConCantidadPositivaPorDeposito()` | Baja de depósito | Asumir false o crear un stub |
+| `StockJdbcDao.existeConCantidadPositiva()` | Baja de producto | Disponible (Santiago lo subió) |
+| `StockJdbcDao.existeConCantidadPositivaPorDeposito()` | Baja de depósito | Disponible (Santiago lo subió) |
 
-Ambos métodos son simples (un SELECT COUNT). Si Santiago no los tiene aún, se pueden implementar primero como stubs y después reemplazar.
+Santiago subió `StockJdbcDao`, `MovimientoStockJdbcDao` y `StockServicio` el 13/11. También creó `EntidadMaestra` y adaptó los tres modelos (`Categoria`, `Producto`, `Deposito`) para que la extiendan. Las dos dependencias están resueltas, no hacen falta stubs.
 
 ## 6. Estimación
 
@@ -271,3 +271,12 @@ Ambos métodos son simples (un SELECT COUNT). Si Santiago no los tiene aún, se 
 | Etapa 3 — Productos (DAO + servicio + prueba) | 3-4 horas |
 | Etapa 4 — MenuMaestros + integrar en Main | 2-3 horas |
 | **Total** | **9-13 horas** |
+
+## 7. Progreso
+
+| Fecha | Avance |
+|---|---|
+| 13/11/2026 | Etapa 1 — `CategoriaJdbcDao` y `CategoriaServicio` creados. Se agrego `existeActivoPorCategoria` a la interfaz `ProductoDao` (necesario para la baja de categoria). Compila correctamente. |
+| 13/11/2026 | Etapa 2 — `DepositoJdbcDao` y `DepositoServicio` creados. La baja valida stock con cantidad > 0 (usa `StockDao` de Santiago) y que quede al menos un deposito activo (`contarActivos >= 2`). Se agrego `FOR UPDATE` a `contarActivos` y reintento por deadlock en `darDeBaja` para cubrir el caso de concurrencia de dos bajas simultaneas. |
+| 13/11/2026 | Etapa 3 — `ProductoJdbcDao` y `ProductoServicio` creados. El DAO incluye `existeActivoPorCategoria`. El servicio bloquea la categoria (FOR UPDATE, orden CATEGORIA -> PRODUCTO) al crear y modificar, y verifica stock antes de la baja. |
+| 13/11/2026 | Etapa 4 — `MenuMaestros` completo con submenus de Categorias, Productos y Depositos (alta, modificar, listar, dar de baja). `Main.java` actualizado: crea los DAOs y servicios de maestros y los conecta con el menu. Se corrigieron tildes en mensajes de error de `DepositoServicio` y `ProductoServicio`. Compila correctamente (39 archivos). |

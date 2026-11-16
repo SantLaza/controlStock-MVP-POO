@@ -19,7 +19,7 @@ Aplicacion de consola para administrar productos y controlar sus existencias en 
 
 ## Arquitectura
 
-La aplicacion sigue una arquitectura en capas:
+La aplicacion sigue una arquitectura en capas con inversion de dependencias: los servicios dependen de interfaces DAO, no de implementaciones concretas.
 
 ```
 Interfaz (ui) -> Servicios (servicio) -> DAO (dao) -> Base de datos
@@ -27,43 +27,81 @@ Interfaz (ui) -> Servicios (servicio) -> DAO (dao) -> Base de datos
 
 | Capa | Responsabilidad |
 |---|---|
-| `modelo` | Clases del dominio y enumerados (Usuario, Categoria, Producto, Deposito, Stock, MovimientoStock, Auditoria) |
+| `modelo` | Clases del dominio (Usuario, Categoria, Producto, Deposito, Stock, MovimientoStock, Auditoria), clase abstracta EntidadMaestra y enumerados (Estado, Rol, TipoMovimiento, Accion, EntidadAfectada) |
 | `dao` | Interfaces de persistencia; en `dao/jdbc`, implementaciones con JDBC |
-| `servicio` | Logica de negocio, validaciones, transacciones y control de concurrencia |
-| `ui` | Menus de consola organizados por modulo |
-| `util` | Conexion a la base de datos y configuracion |
-
-Los servicios dependen de interfaces DAO, no de implementaciones concretas.
+| `servicio` | Logica de negocio, validaciones, transacciones y control de concurrencia (ReglaNegocioException para errores de dominio) |
+| `ui` | Menus de consola organizados por modulo (Principal, Maestros, Stock, Consultas) |
+| `util` | Conexion a la base de datos (ConexionDB) y carga de configuracion (Configuracion) |
 
 ## Estructura del repositorio
 
 ```
 controlStock-MVP-POO/
-├── pom.xml                      Proyecto Maven
-├── db.properties.example        Plantilla de configuracion (sin credenciales)
+├── pom.xml                          Proyecto Maven
+├── db.properties.example            Plantilla de configuracion (sin credenciales)
 ├── docs/
-│   ├── plan_mvp.md              Plan del MVP: alcance, calendario y acuerdos
-│   ├── explicacion_DER_MVP.md   Explicacion del DER
+│   ├── plan_mvp.md                  Plan del MVP: alcance, calendario y acuerdos
+│   ├── explicacion_DER_MVP.md       Explicacion del DER
 │   ├── explicacion_modelo_logico_MVP.md
-│   ├── base_codigo.md           Decisiones de la base de codigo
-│   ├── plan_modulo_maestros.md  Plan de implementacion: maestros
-│   ├── plan_modulo_stock.md     Plan de implementacion: stock
-│   ├── der_mvp.drawio           DER del MVP (draw.io)
-│   ├── der_mvp.png              DER del MVP (imagen)
-│   └── modelo_logico_MVP.png    Modelo logico (imagen)
+│   ├── modelo_relacional_mvp.md     Derivacion a tablas y camino referencial
+│   ├── base_codigo.md               Decisiones de la base de codigo
+│   ├── plan_modulo_maestros.md      Plan de implementacion: maestros (Joaquin)
+│   ├── plan_modulo_stock.md         Plan de implementacion: stock (Santiago)
+│   ├── der_mvp.drawio               DER del MVP (draw.io)
+│   ├── der_mvp.png                  DER del MVP (imagen)
+│   ├── modelo_logico_mvp.drawio     Modelo logico (draw.io)
+│   └── modelo_logico_MVP.png        Modelo logico (imagen)
 ├── sql/
-│   ├── 00_reiniciar.sql         Borra la base (solo para reinstalar)
-│   ├── 01_schema.sql            Crea la base y las 7 tablas
-│   ├── 02_datos_prueba.sql      Administrador y datos iniciales
-│   └── 03_usuario_app.sql       Cuenta de la aplicacion con permisos minimos
+│   ├── 00_reiniciar.sql             Borra la base (solo para reinstalar)
+│   ├── 01_schema.sql                Crea la base y las 7 tablas
+│   ├── 02_datos_prueba.sql          Administrador y datos iniciales
+│   └── 03_usuario_app.sql           Cuenta de la aplicacion con permisos minimos
 └── src/main/java/controlstock/
-    ├── Main.java
-    ├── modelo/                  Clases del dominio y enumerados
-    ├── dao/                     Interfaces de persistencia
-    │   └── jdbc/                Implementaciones JDBC
-    ├── servicio/                Logica de negocio
-    ├── ui/                      Menus de consola
-    └── util/                    Conexion y configuracion
+    ├── Main.java                    Punto de entrada
+    ├── modelo/
+    │   ├── EntidadMaestra.java      Clase abstracta (estado activo/inactivo)
+    │   ├── Categoria.java
+    │   ├── Producto.java
+    │   ├── Deposito.java
+    │   ├── Stock.java
+    │   ├── MovimientoStock.java
+    │   ├── Usuario.java
+    │   ├── Auditoria.java
+    │   ├── Estado.java              Enum: activo / inactivo
+    │   ├── Rol.java                 Enum: administrador, encargado, operador
+    │   ├── TipoMovimiento.java      Enum: ajuste positivo / negativo
+    │   ├── Accion.java              Enum: alta, modificacion, baja logica
+    │   └── EntidadAfectada.java     Enum: categoria, producto, deposito, stock, usuario
+    ├── dao/
+    │   ├── CategoriaDao.java
+    │   ├── ProductoDao.java
+    │   ├── DepositoDao.java
+    │   ├── StockDao.java
+    │   ├── MovimientoStockDao.java
+    │   ├── UsuarioDao.java
+    │   ├── AuditoriaDao.java
+    │   └── jdbc/
+    │       ├── CategoriaJdbcDao.java
+    │       ├── ProductoJdbcDao.java
+    │       ├── DepositoJdbcDao.java
+    │       ├── StockJdbcDao.java
+    │       ├── MovimientoStockJdbcDao.java
+    │       └── UsuarioJdbcDao.java
+    ├── servicio/
+    │   ├── CategoriaServicio.java
+    │   ├── ProductoServicio.java
+    │   ├── DepositoServicio.java
+    │   ├── StockServicio.java
+    │   ├── SesionServicio.java
+    │   └── ReglaNegocioException.java
+    ├── ui/
+    │   ├── MenuPrincipal.java
+    │   ├── MenuMaestros.java
+    │   ├── MenuStock.java
+    │   └── MenuConsultas.java
+    └── util/
+        ├── ConexionDB.java
+        └── Configuracion.java
 ```
 
 ## Requisitos previos
@@ -78,45 +116,22 @@ SELECT @@GLOBAL.sql_mode;
 ```
 El resultado debe incluir `STRICT_TRANS_TABLES`.
 
-## Instalacion
+## Uso rapido
 
-### Base de datos
-
-Con una cuenta administradora (por ejemplo, `root`), ejecutar en orden:
-
-```
-sql/01_schema.sql
-sql/02_datos_prueba.sql
-sql/03_usuario_app.sql
-```
-
-Luego, asignar una contrasena a la cuenta de la aplicacion (en una consulta que no se guarde en el repositorio):
-
-```sql
-ALTER USER 'controlstock_app'@'localhost' IDENTIFIED BY 'la_contrasena_elegida';
-```
-
-### Configuracion local
-
-Copiar la plantilla y completar la contrasena:
+Compilar y ejecutar:
 
 ```bash
-cp db.properties.example db.properties
+mvn package -q
+java -cp "target/controlstock-mvp-0.1-SNAPSHOT.jar:target/dependency/*" controlstock.Main
 ```
 
-Editar `db.properties` con la contrasena asignada en el paso anterior. Este archivo esta en el `.gitignore` y no se versiona.
+Usuario de prueba: `admin` / `admin123`.
 
-### Compilacion y ejecucion
-
-```bash
-mvn compile exec:java -Dexec.mainClass=controlstock.Main
-```
-
-Usuario de prueba: `admin` / `admin123`
+La aplicacion requiere que la base de datos este creada y configurada previamente. Consultar los scripts en `sql/` y el archivo `db.properties.example` para los datos de conexion.
 
 ## Alcance funcional
 
-**Nucleo (imprescindible)**
+**Implementado**
 
 - Inicio y cierre de sesion con un usuario administrador precargado.
 - Alta, modificacion, listado y baja logica de categorias, productos y depositos.
@@ -124,7 +139,7 @@ Usuario de prueba: `admin` / `admin123`
 - Ajustes de stock positivos y negativos, con motivo obligatorio y sin stock negativo.
 - Consulta de stock por deposito, stock total y listado de productos con stock bajo.
 
-**Bloques adicionales (si el tiempo lo permite)**
+**Pendiente**
 
 - Movimientos compensatorios para corregir ajustes.
 - Historial de movimientos con filtros.
@@ -137,13 +152,9 @@ Usuario de prueba: `admin` / `admin123`
 - Las credenciales de conexion no se versionan (`db.properties` en `.gitignore`).
 - Todas las consultas usan sentencias parametrizadas.
 
-## Documentacion
+## Autores
 
-| Documento | Contenido |
+| Integrante | Modulo principal |
 |---|---|
-| `docs/plan_mvp.md` | Alcance, tecnologia, acuerdos de diseno, reparto del trabajo y calendario |
-| `docs/explicacion_DER_MVP.md` | Origen del DER, entidades, relaciones y restricciones |
-| `docs/explicacion_modelo_logico_MVP.md` | Derivacion del DER a tablas y camino referencial |
-| `docs/base_codigo.md` | Decisiones de la base de codigo: paquetes, convenciones y contratos |
-| `docs/plan_modulo_maestros.md` | Plan de implementacion del modulo de maestros |
-| `docs/plan_modulo_stock.md` | Plan de implementacion del modulo de stock |
+| Joaquin Curihuala | Maestros: categorias, productos y depositos (DAO, servicios y menu) |
+| Santiago Lazarte | Stock: habilitacion, ajustes, movimientos y consultas (DAO, servicios y menu) |

@@ -61,7 +61,8 @@ public class Main {
 
         MenuMaestros menuMaestros = new MenuMaestros(scanner, categoriaServicio,
                 productoServicio, depositoServicio);
-        MenuStock menuStock = new MenuStock(scanner, stockServicio, sesionServicio);
+        MenuStock menuStock = new MenuStock(scanner, stockServicio, sesionServicio,
+                productoServicio, depositoServicio, consultaServicio);
         MenuConsultas menuConsultas = new MenuConsultas(scanner, consultaServicio,
                 productoServicio, depositoServicio);
 

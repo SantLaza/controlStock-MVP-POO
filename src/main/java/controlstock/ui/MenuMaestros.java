@@ -14,6 +14,9 @@ import java.util.Scanner;
 
 public class MenuMaestros {
 
+    /** Al modificar, escribir esto en un campo opcional lo deja vacío (NULL). */
+    private static final String MARCA_BORRAR = "-";
+
     private final Scanner scanner;
     private final CategoriaServicio categoriaServicio;
     private final ProductoServicio productoServicio;
@@ -192,7 +195,11 @@ public class MenuMaestros {
                 System.out.println("Alta cancelada.\n");
                 return;
             }
-            int idCategoria = leerEntero("Categoría (ID): ");
+            int idCategoria = leerCategoriaActiva(activas);
+            if (idCategoria == 0) {
+                System.out.println("Alta cancelada.\n");
+                return;
+            }
             String nombre = leerTextoObligatorio("Nombre: ");
             String descripcion = leerTextoOpcional("Descripción (enter para omitir): ");
             BigDecimal precioCompra = leerBigDecimal("Precio de compra: ");
@@ -247,15 +254,11 @@ public class MenuMaestros {
 
             System.out.println("\nNuevos valores (enter para mantener el actual):");
             String codigo = leerTextoConActual("Código", actual.getCodigoProducto());
-            int idCategoria = leerEnteroConActual("Categoría (ID)",
-                    actual.getIdCategoria());
+            int idCategoria = leerCategoriaConActual(actual.getIdCategoria(), catActivas);
             String nombre = leerTextoConActual("Nombre", actual.getNombreProducto());
 
-            String descActual = actual.getDescripcion();
-            System.out.print("Descripción ["
-                    + (descActual != null ? descActual : "sin descripción") + "]: ");
-            String descInput = scanner.nextLine();
-            String descripcion = descInput.trim().isEmpty() ? descActual : descInput.trim();
+            String descripcion = leerOpcionalConActual("Descripción",
+                    actual.getDescripcion(), "sin descripción");
 
             BigDecimal precioCompra = leerBigDecimalConActual("Precio compra",
                     actual.getPrecioReferenciaCompra());
@@ -379,11 +382,8 @@ public class MenuMaestros {
             System.out.println("\nNuevos valores (enter para mantener el actual):");
             String nombre = leerTextoConActual("Nombre", actual.getNombreDeposito());
 
-            String dirActual = actual.getDireccion();
-            System.out.print("Dirección ["
-                    + (dirActual != null ? dirActual : "sin dirección") + "]: ");
-            String dirInput = scanner.nextLine();
-            String direccion = dirInput.trim().isEmpty() ? dirActual : dirInput.trim();
+            String direccion = leerOpcionalConActual("Dirección",
+                    actual.getDireccion(), "sin dirección");
 
             Deposito modificado = depositoServicio.modificar(id, nombre, direccion);
             System.out.println("Depósito modificado: " + modificado + "\n");
@@ -498,6 +498,36 @@ public class MenuMaestros {
         }
     }
 
+    /**
+     * Alta de producto: pide el id hasta que sea de una categoría activa de la
+     * lista mostrada, así el error no aparece recién después de cargar todo.
+     * Devuelve 0 si el usuario cancela. El servicio lo vuelve a validar.
+     */
+    private int leerCategoriaActiva(List<Categoria> activas) {
+        while (true) {
+            int id = leerEntero("Categoría (ID, 0 para cancelar): ");
+            if (id == 0 || buscarCategoria(activas, id) != null) {
+                return id;
+            }
+            System.out.println("No hay una categoría activa con ese ID.");
+        }
+    }
+
+    /**
+     * Modificación de producto: enter conserva la categoría actual, aunque esté
+     * inactiva (regla 9 de modelo_relacional_mvp.md §5.3). Una categoría nueva
+     * tiene que ser una de las activas.
+     */
+    private int leerCategoriaConActual(int actual, List<Categoria> activas) {
+        while (true) {
+            int id = leerEnteroConActual("Categoría (ID)", actual);
+            if (id == actual || buscarCategoria(activas, id) != null) {
+                return id;
+            }
+            System.out.println("No hay una categoría activa con ese ID.");
+        }
+    }
+
     private BigDecimal leerBigDecimal(String mensaje) {
         while (true) {
             System.out.print(mensaje);
@@ -550,6 +580,21 @@ public class MenuMaestros {
         System.out.print(mensaje);
         String linea = scanner.nextLine().trim();
         return linea.isEmpty() ? null : linea;
+    }
+
+    /**
+     * Campo opcional al modificar (descripción, dirección): enter conserva el
+     * valor actual, {@link #MARCA_BORRAR} lo borra y cualquier otro texto lo
+     * reemplaza.
+     */
+    private String leerOpcionalConActual(String campo, String actual, String textoSinValor) {
+        System.out.print(campo + " [" + (actual != null ? actual : textoSinValor)
+                + "] (enter mantiene, " + MARCA_BORRAR + " borra): ");
+        String linea = scanner.nextLine().trim();
+        if (linea.isEmpty()) {
+            return actual;
+        }
+        return linea.equals(MARCA_BORRAR) ? null : linea;
     }
 
     private String leerTextoConActual(String campo, String actual) {

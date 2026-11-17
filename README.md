@@ -15,7 +15,7 @@ Aplicacion de consola para administrar productos y controlar sus existencias en 
 | Base de datos | MySQL 8.0.16 o superior |
 | Acceso a datos | JDBC con consultas parametrizadas |
 | Hash de contrasenas | BCrypt (jBCrypt 0.4) |
-| Pruebas | JUnit 5 |
+| Pruebas | Programa de concurrencia contra la base (`PruebaConcurrencia`, con `main`) |
 
 ## Arquitectura
 
@@ -56,6 +56,8 @@ controlStock-MVP-POO/
 │   ├── 01_schema.sql                Crea la base y las 7 tablas
 │   ├── 02_datos_prueba.sql          Administrador y datos iniciales
 │   └── 03_usuario_app.sql           Cuenta de la aplicacion con permisos minimos
+├── src/test/java/controlstock/
+│   └── PruebaConcurrencia.java      Pruebas de concurrencia contra la base (docs/plan_modulo_stock.md, seccion 5)
 └── src/main/java/controlstock/
     ├── Main.java                    Punto de entrada
     ├── modelo/
@@ -92,6 +94,8 @@ controlStock-MVP-POO/
     │   ├── ProductoServicio.java
     │   ├── DepositoServicio.java
     │   ├── StockServicio.java
+    │   ├── ConsultaServicio.java    Consultas de stock (solo lectura)
+    │   ├── LineaStock.java          Fila de consulta: stock + producto + deposito
     │   ├── SesionServicio.java
     │   └── ReglaNegocioException.java
     ├── ui/
@@ -106,28 +110,83 @@ controlStock-MVP-POO/
 
 ## Requisitos previos
 
-- Java 17 o superior
+- JDK 17 o superior
 - Maven 3.8 o superior
-- MySQL 8.0.16 o superior con `STRICT_TRANS_TABLES` habilitado
+- MySQL 8.0.16 o superior con `STRICT_TRANS_TABLES` habilitado, y una cuenta administradora (por ejemplo, `root`) para crear la base
 
 Para verificar el modo estricto:
 ```sql
 SELECT @@GLOBAL.sql_mode;
 ```
-El resultado debe incluir `STRICT_TRANS_TABLES`.
+El resultado debe incluir `STRICT_TRANS_TABLES`. Si no lo incluye, la aplicacion no arranca y explica el motivo.
 
-## Uso rapido
+## Instalacion y ejecucion
 
-Compilar y ejecutar:
+Todos los comandos se ejecutan desde la raiz del repositorio.
+
+### 1. Crear la base de datos
+
+Abrir el cliente de MySQL con la cuenta administradora:
 
 ```bash
-mvn package -q
+mysql -u root -p --default-character-set=utf8mb4
+```
+
+y ejecutar los scripts en este orden:
+
+```sql
+source sql/01_schema.sql
+source sql/02_datos_prueba.sql
+source sql/03_usuario_app.sql
+ALTER USER 'controlstock_app'@'localhost' IDENTIFIED BY 'elegir_una_contrasena';
+```
+
+- `01` crea la base `controlstock_mvp` y sus 7 tablas; `02` carga el administrador y el Deposito Central; `03` crea la cuenta `controlstock_app`, con la que se conecta la aplicacion (permisos minimos, ver [Seguridad](#seguridad)).
+- `03` crea la cuenta con una contrasena provisoria y vencida: el `ALTER USER` le pone la definitiva. Evitar acentos y la letra enie (ver el paso 2).
+- Si `mysql` no se reconoce como comando, en Windows esta en `C:\Program Files\MySQL\MySQL Server 8.0\bin`: agregar esa carpeta al `PATH`, o abrir y ejecutar los tres scripts y el `ALTER USER`, en el mismo orden, desde MySQL Workbench.
+
+**Reinstalar desde cero** (borra todos los datos): ejecutar `source sql/00_reiniciar.sql` y despues `01`, `02` y `03`. El `ALTER USER` no hace falta: la cuenta `controlstock_app` no se borra y conserva su contrasena.
+
+### 2. Configurar la conexion
+
+Copiar la plantilla como `db.properties`:
+
+```bash
+cp db.properties.example db.properties
+```
+
+(en PowerShell: `Copy-Item db.properties.example db.properties`)
+
+y completar `db.contrasena` con la contrasena del `ALTER USER`. El archivo se lee como ISO-8859-1, por eso la contrasena no debe llevar acentos ni enie. `db.properties` esta en el `.gitignore`: nunca se sube al repositorio.
+
+La aplicacion busca `db.properties` en la carpeta desde donde se ejecuta: hay que ejecutarla desde la raiz del repositorio.
+
+### 3. Compilar
+
+```bash
+mvn package
+mvn dependency:copy-dependencies -DincludeScope=runtime
+```
+
+El primero genera `target/controlstock-mvp-0.1-SNAPSHOT.jar`. Ese jar no incluye las bibliotecas, por eso el segundo copia MySQL Connector/J y jBCrypt en `target/dependency/`.
+
+### 4. Ejecutar
+
+El separador del classpath depende del sistema operativo.
+
+En Windows (PowerShell, cmd o Git Bash), con `;`:
+
+```bash
+java -cp "target/controlstock-mvp-0.1-SNAPSHOT.jar;target/dependency/*" controlstock.Main
+```
+
+En Linux y macOS, con `:`:
+
+```bash
 java -cp "target/controlstock-mvp-0.1-SNAPSHOT.jar:target/dependency/*" controlstock.Main
 ```
 
 Usuario de prueba: `admin` / `admin123`.
-
-La aplicacion requiere que la base de datos este creada y configurada previamente. Consultar los scripts en `sql/` y el archivo `db.properties.example` para los datos de conexion.
 
 ## Alcance funcional
 

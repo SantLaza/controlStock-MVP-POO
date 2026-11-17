@@ -68,7 +68,11 @@ public class MenuMaestros {
 
     private void altaCategoria() {
         System.out.println("--- Alta de categoría ---");
-        String nombre = leerTextoObligatorio("Nombre: ");
+        String nombre = leerPrimerCampoDeAlta("Nombre");
+        if (nombre == null) {
+            System.out.println("Alta cancelada.\n");
+            return;
+        }
         try {
             Categoria creada = categoriaServicio.crear(nombre);
             System.out.println("Categoría creada: " + creada + "\n");
@@ -183,7 +187,11 @@ public class MenuMaestros {
             }
             System.out.println();
 
-            String codigo = leerTextoObligatorio("Código: ");
+            String codigo = leerPrimerCampoDeAlta("Código");
+            if (codigo == null) {
+                System.out.println("Alta cancelada.\n");
+                return;
+            }
             int idCategoria = leerEntero("Categoría (ID): ");
             String nombre = leerTextoObligatorio("Nombre: ");
             String descripcion = leerTextoOpcional("Descripción (enter para omitir): ");
@@ -327,7 +335,11 @@ public class MenuMaestros {
 
     private void altaDeposito() {
         System.out.println("--- Alta de depósito ---");
-        String nombre = leerTextoObligatorio("Nombre: ");
+        String nombre = leerPrimerCampoDeAlta("Nombre");
+        if (nombre == null) {
+            System.out.println("Alta cancelada.\n");
+            return;
+        }
         String direccion = leerTextoOpcional("Dirección (enter para omitir): ");
         try {
             Deposito creado = depositoServicio.crear(nombre, direccion);
@@ -522,6 +534,16 @@ public class MenuMaestros {
             if (!linea.isEmpty()) return linea;
             System.out.println("Este campo es obligatorio.");
         }
+    }
+
+    /**
+     * Primer campo de un alta: devuelve null si el usuario cancela con enter
+     * vacío o con 0 (el mismo número que "Volver" en los menús).
+     */
+    private String leerPrimerCampoDeAlta(String campo) {
+        System.out.print(campo + " (enter o 0 para cancelar): ");
+        String linea = scanner.nextLine().trim();
+        return (linea.isEmpty() || linea.equals("0")) ? null : linea;
     }
 
     private String leerTextoOpcional(String mensaje) {

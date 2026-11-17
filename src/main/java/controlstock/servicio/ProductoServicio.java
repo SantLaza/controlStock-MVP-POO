@@ -18,6 +18,10 @@ public class ProductoServicio {
     private static final int LARGO_MAXIMO_NOMBRE = 100;
     private static final int LARGO_MAXIMO_DESCRIPCION = 255;
 
+    /** Columnas de precio: DECIMAL(12,2), es decir 10 dígitos enteros y 2 decimales. */
+    private static final int DECIMALES_PRECIO = 2;
+    private static final BigDecimal PRECIO_MAXIMO = new BigDecimal("9999999999.99");
+
     private final ProductoDao productoDao;
     private final CategoriaDao categoriaDao;
     private final StockDao stockDao;
@@ -71,20 +75,25 @@ public class ProductoServicio {
         try (Connection conn = ConexionDB.obtenerConexion()) {
             conn.setAutoCommit(false);
             try {
-                Categoria categoria = categoriaDao.buscarPorIdConBloqueo(conn, nuevaCategoria);
-                if (categoria == null) {
+                // Regla 9 (modelo_relacional_mvp.md §5.3): la categoría se valida solo si
+                // cambia. Para saberlo se lee el producto SIN bloqueo; así, si hay que
+                // bloquear la categoría, se bloquea antes que el producto (orden §5.4).
+                Producto leido = productoDao.buscarPorId(conn, id);
+                if (leido == null) {
                     throw new ReglaNegocioException(
-                            "No existe la categoría con id " + nuevaCategoria + ".");
+                            "No existe el producto con id " + id + ".");
                 }
-                if (!categoria.estaActivo()) {
-                    throw new ReglaNegocioException(
-                            "La categoría '" + categoria.getNombre() + "' está inactiva.");
+                boolean cambiaCategoria = nuevaCategoria != leido.getIdCategoria();
+                if (cambiaCategoria) {
+                    verificarCategoriaActiva(conn, nuevaCategoria);
                 }
 
                 Producto producto = productoDao.buscarPorIdConBloqueo(conn, id);
-                if (producto == null) {
+                // Entre las dos lecturas otra sesión pudo cambiarle la categoría: si no
+                // se validó, guardar la recibida la devolvería a una sin verificar.
+                if (!cambiaCategoria && producto.getIdCategoria() != nuevaCategoria) {
                     throw new ReglaNegocioException(
-                            "No existe el producto con id " + id + ".");
+                            "Otra sesión cambió la categoría del producto. Volvé a intentarlo.");
                 }
                 producto.setCodigoProducto(codigoLimpio);
                 producto.setIdCategoria(nuevaCategoria);
@@ -207,6 +216,18 @@ public class ProductoServicio {
         if (precio.compareTo(BigDecimal.ZERO) < 0) {
             throw new ReglaNegocioException(
                     "El precio de referencia de " + tipo + " no puede ser negativo.");
+        }
+        // DECIMAL(12,2) redondea sin avisar: se rechaza en lugar de guardar otro valor.
+        // stripTrailingZeros acepta los valores exactos con ceros de más (1.500).
+        if (precio.stripTrailingZeros().scale() > DECIMALES_PRECIO) {
+            throw new ReglaNegocioException(
+                    "El precio de referencia de " + tipo + " no puede tener más de "
+                    + DECIMALES_PRECIO + " decimales.");
+        }
+        if (precio.compareTo(PRECIO_MAXIMO) > 0) {
+            throw new ReglaNegocioException(
+                    "El precio de referencia de " + tipo + " no puede superar "
+                    + PRECIO_MAXIMO.toPlainString() + ".");
         }
     }
 

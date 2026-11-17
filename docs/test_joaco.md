@@ -166,18 +166,20 @@ Esto confirma la corrección del orden de bloqueo de `DepositoServicio.darDeBaja
 
 Prioridad **media**: contradice una regla documentada. Prioridad **baja**: es de usabilidad o de presentación, y no afecta la integridad de los datos. El responsable sigue el reparto de `plan_mvp.md`, sección 6.2.
 
-| Id | Prioridad | Resumen | Archivo | Responsable |
-|---|---|---|---|---|
-| H-01 | Media | No se puede modificar un producto cuya categoría está inactiva, aunque no se cambie la categoría | `servicio/ProductoServicio.java` | Joaquín |
-| H-02 | Baja | Las altas no se pueden cancelar; escribir `0` crea un registro con ese nombre | `ui/MenuMaestros.java` | Joaquín |
-| H-03 | Baja | Definir el mínimo no exige producto ni depósito activos | `servicio/StockServicio.java` | Santiago |
-| H-04 | Baja | Definir el mínimo con un producto inexistente informa «no está habilitado» | `servicio/StockServicio.java` | Santiago |
-| H-05 | Baja | La columna Código no tolera códigos de más de 12 caracteres | `ui/MenuConsultas.java` | Santiago |
-| H-06 | Baja | Mensajes genéricos o técnicos ante errores de la base | `servicio/ReglaNegocioException.java` | Compartido |
-| H-07 | Baja | La aplicación termina con una excepción si se cierra la entrada | Menús (`ui/`) | Compartido |
-| H-08 | Baja | Los precios con más de dos decimales se redondean sin aviso | `ui/MenuMaestros.java`, `servicio/ProductoServicio.java` | Joaquín |
-| H-09 | Baja | Al modificar, no se puede borrar la dirección ni la descripción | `ui/MenuMaestros.java` | Joaquín |
-| H-10 | Baja | Los menús de Stock piden todos los datos antes de validar y no muestran listas | `ui/MenuStock.java`, `ui/MenuMaestros.java` | Santiago / Joaquín |
+| Id | Prioridad | Resumen | Archivo | Responsable | Estado |
+|---|---|---|---|---|---|
+| H-01 | Media | No se puede modificar un producto cuya categoría está inactiva, aunque no se cambie la categoría | `servicio/ProductoServicio.java` | Joaquín | Corregido (17/11) |
+| H-02 | Baja | Las altas no se pueden cancelar; escribir `0` crea un registro con ese nombre | `ui/MenuMaestros.java` | Joaquín | Corregido (17/11) |
+| H-03 | Baja | Definir el mínimo no exige producto ni depósito activos | `servicio/StockServicio.java` | Santiago | Pendiente |
+| H-04 | Baja | Definir el mínimo con un producto inexistente informa «no está habilitado» | `servicio/StockServicio.java` | Santiago | Pendiente |
+| H-05 | Baja | La columna Código no tolera códigos de más de 12 caracteres | `ui/MenuConsultas.java` | Santiago | Pendiente |
+| H-06 | Baja | Mensajes genéricos o técnicos ante errores de la base | `servicio/ReglaNegocioException.java` | Compartido | Corregido en parte (17/11): precio fuera de rango |
+| H-07 | Baja | La aplicación termina con una excepción si se cierra la entrada | Menús (`ui/`) | Compartido | Pendiente |
+| H-08 | Baja | Los precios con más de dos decimales se redondean sin aviso | `ui/MenuMaestros.java`, `servicio/ProductoServicio.java` | Joaquín | Corregido (17/11) |
+| H-09 | Baja | Al modificar, no se puede borrar la dirección ni la descripción | `ui/MenuMaestros.java` | Joaquín | Pendiente |
+| H-10 | Baja | Los menús de Stock piden todos los datos antes de validar y no muestran listas | `ui/MenuStock.java`, `ui/MenuMaestros.java` | Santiago / Joaquín | Pendiente |
+
+Las correcciones del 17/11 siguen `docs/plan_correcciones_maestros.md`, que tiene el diseño y la verificación. Las secciones 3 y 4 describen el comportamiento del commit `63534b3`, previo a esas correcciones.
 
 ### H-01 — Modificar un producto de una categoría inactiva
 

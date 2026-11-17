@@ -92,21 +92,29 @@ public class StockJdbcDao implements StockDao {
         }
     }
 
+    /*
+     * Los dos métodos siguientes los usan las bajas de producto y de depósito.
+     * Llevan FOR SHARE (modelo_relacional_mvp.md §5.4) para leer el saldo ya
+     * confirmado y no la foto de la transacción: un ajuste en curso sobre esas
+     * filas obliga a esperar su commit antes de decidir la baja.
+     */
+
     @Override
     public boolean existeConCantidadPositiva(Connection conn, int idProducto)
             throws SQLException {
-        String sql = "SELECT 1 FROM STOCK WHERE idProducto = ? AND cantidad > 0 LIMIT 1";
+        String sql = "SELECT 1 FROM STOCK WHERE idProducto = ? AND cantidad > 0 "
+                   + "LIMIT 1 FOR SHARE";
         return existe(conn, sql, idProducto);
     }
 
     @Override
     public boolean existeConCantidadPositivaPorDeposito(Connection conn, int idDeposito)
             throws SQLException {
-        String sql = "SELECT 1 FROM STOCK WHERE idDeposito = ? AND cantidad > 0 LIMIT 1";
+        String sql = "SELECT 1 FROM STOCK WHERE idDeposito = ? AND cantidad > 0 "
+                   + "LIMIT 1 FOR SHARE";
         return existe(conn, sql, idDeposito);
     }
 
-    
     // Auxiliares privados
 
     /** Ejecuta una búsqueda por clave compuesta. Devuelve null si no hay fila. */

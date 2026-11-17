@@ -75,6 +75,11 @@ public class DepositoServicio {
             try (Connection conn = ConexionDB.obtenerConexion()) {
                 conn.setAutoCommit(false);
                 try {
+                    // Orden de bloqueo de modelo_relacional_mvp.md §5.4: primero todos los
+                    // depósitos activos (FOR UPDATE), después el STOCK del depósito (FOR SHARE).
+                    // Dos bajas simultáneas piden el mismo conjunto de filas en el mismo orden,
+                    // así que una espera a la otra en lugar de producir un deadlock.
+                    int activos = depositoDao.contarActivos(conn);
                     Deposito deposito = depositoDao.buscarPorIdConBloqueo(conn, id);
                     if (deposito == null) {
                         throw new ReglaNegocioException(
@@ -88,7 +93,7 @@ public class DepositoServicio {
                         throw new ReglaNegocioException(
                                 "No se puede dar de baja: tiene stock con cantidad mayor a 0.");
                     }
-                    if (depositoDao.contarActivos(conn) < 2) {
+                    if (activos < 2) {
                         throw new ReglaNegocioException(
                                 "No se puede dar de baja: debe quedar al menos un depósito activo.");
                     }

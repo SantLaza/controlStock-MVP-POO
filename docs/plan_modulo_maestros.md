@@ -131,7 +131,7 @@ Igual que Categoría, con el agregado:
 | `buscarPorIdConBloqueo` | `SELECT ... WHERE idDeposito = ? FOR UPDATE` |
 | `listarActivos` | `SELECT ... WHERE estadoDeposito = 'activo' ORDER BY nombreDeposito` |
 | `listarTodos` | `SELECT ... ORDER BY nombreDeposito` |
-| `contarActivos` | `SELECT COUNT(*) FROM DEPOSITO WHERE estadoDeposito = 'activo'` |
+| `contarActivos` | `SELECT COUNT(*) FROM DEPOSITO WHERE estadoDeposito = 'activo' FOR UPDATE` |
 
 **3.5 DepositoServicio**
 
@@ -139,7 +139,7 @@ Igual que Categoría, con el agregado:
 |---|---|
 | `crear(nombre, direccion)` | Nombre no vacío. Dirección puede ser null o no vacía. Duplicado → 1062. |
 | `modificar(id, nuevoNombre, nuevaDireccion)` | Depósito debe existir. Mismas validaciones que crear. |
-| `darDeBaja(id)` | Depósito debe existir y estar activo. **No debe tener stock con cantidad > 0** (usar `StockDao.existeConCantidadPositivaPorDeposito`). **Debe quedar al menos un depósito activo** (usar `contarActivos` ≥ 2 antes de dar de baja). |
+| `darDeBaja(id)` | Depósito debe existir y estar activo. **No debe tener stock con cantidad > 0** (usar `StockDao.existeConCantidadPositivaPorDeposito`). **Debe quedar al menos un depósito activo** (usar `contarActivos` ≥ 2 antes de dar de baja). Orden de bloqueo (§5.4): `contarActivos` como primera sentencia, luego el depósito y por último el STOCK con `FOR SHARE`. |
 | `listarActivos()` | — |
 | `listarTodos()` | — |
 
@@ -173,7 +173,7 @@ SQL: `SELECT 1 FROM PRODUCTO WHERE idCategoria = ? AND estadoProducto = 'activo'
 |---|---|
 | `crear(codigo, idCategoria, nombre, descripcion, precioCompra, precioVenta)` | Código y nombre no vacíos. Precios ≥ 0. **La categoría debe existir y estar activa** (bloqueo `buscarPorIdConBloqueo` sobre CATEGORIA, luego INSERT en PRODUCTO). Duplicados de código → 1062. |
 | `modificar(id, ...)` | Producto debe existir. Si se cambia la categoría, la nueva debe estar activa. |
-| `darDeBaja(id)` | Producto debe existir y estar activo. **No debe tener stock con cantidad > 0** en ningún depósito (usar `StockDao.existeConCantidadPositiva`). |
+| `darDeBaja(id)` | Producto debe existir y estar activo. **No debe tener stock con cantidad > 0** en ningún depósito (usar `StockDao.existeConCantidadPositiva`, con `FOR SHARE` después del bloqueo del producto, §5.4). |
 | `listarActivos()` | — |
 | `listarTodos()` | — |
 
@@ -280,3 +280,4 @@ Santiago subió `StockJdbcDao`, `MovimientoStockJdbcDao` y `StockServicio` el 13
 | 13/11/2026 | Etapa 2 — `DepositoJdbcDao` y `DepositoServicio` creados. La baja valida stock con cantidad > 0 (usa `StockDao` de Santiago) y que quede al menos un deposito activo (`contarActivos >= 2`). Se agrego `FOR UPDATE` a `contarActivos` y reintento por deadlock en `darDeBaja` para cubrir el caso de concurrencia de dos bajas simultaneas. |
 | 13/11/2026 | Etapa 3 — `ProductoJdbcDao` y `ProductoServicio` creados. El DAO incluye `existeActivoPorCategoria`. El servicio bloquea la categoria (FOR UPDATE, orden CATEGORIA -> PRODUCTO) al crear y modificar, y verifica stock antes de la baja. |
 | 13/11/2026 | Etapa 4 — `MenuMaestros` completo con submenus de Categorias, Productos y Depositos (alta, modificar, listar, dar de baja). `Main.java` actualizado: crea los DAOs y servicios de maestros y los conecta con el menu. Se corrigieron tildes en mensajes de error de `DepositoServicio` y `ProductoServicio`. Compila correctamente (39 archivos). |
+| 17/11/2026 | Corrección de bloqueos según `modelo_relacional_mvp.md` §5.4, a partir de las observaciones de `plan_modulo_stock.md` §5.2. `DepositoServicio.darDeBaja` llama a `contarActivos` (FOR UPDATE sobre todos los depósitos activos) como primera sentencia de la transacción: dos bajas simultáneas piden las mismas filas en el mismo orden y una espera a la otra, sin deadlock. El reintento ante 1213 se conserva como protección. `existeConCantidadPositiva` y `existeConCantidadPositivaPorDeposito` de `StockJdbcDao` pasan a usar `FOR SHARE`, de modo que las bajas leen el saldo confirmado y esperan a un ajuste en curso. Cambio en `StockJdbcDao` acordado con Santiago. Verificado con `PruebaConcurrencia` (casos 1, 2 y 3, todas las comprobaciones OK). |

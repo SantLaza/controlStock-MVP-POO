@@ -25,6 +25,7 @@ import controlstock.ui.MenuStock;
 import controlstock.util.ConexionDB;
 
 import java.sql.SQLException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Main {
@@ -67,8 +68,15 @@ public class Main {
         MenuPrincipal menuPrincipal = new MenuPrincipal(
                 scanner, sesionServicio, menuMaestros, menuStock, menuConsultas);
 
-        menuPrincipal.ejecutar();
-
-        scanner.close();
+        try {
+            menuPrincipal.ejecutar();
+        } catch (NoSuchElementException e) {
+            // Se cerró la entrada estándar (Ctrl+Z / Ctrl+D) en cualquier menú.
+            // No se pierde nada: cada operación ya confirmó o deshizo su transacción.
+            System.out.println();
+            System.out.println("Se cerró la entrada. ¡Hasta luego!");
+        } finally {
+            scanner.close();
+        }
     }
 }

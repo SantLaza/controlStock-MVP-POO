@@ -170,11 +170,11 @@ Prioridad **media**: contradice una regla documentada. Prioridad **baja**: es de
 |---|---|---|---|---|---|
 | H-01 | Media | No se puede modificar un producto cuya categoría está inactiva, aunque no se cambie la categoría | `servicio/ProductoServicio.java` | Joaquín | Corregido (17/11) |
 | H-02 | Baja | Las altas no se pueden cancelar; escribir `0` crea un registro con ese nombre | `ui/MenuMaestros.java` | Joaquín | Corregido (17/11) |
-| H-03 | Baja | Definir el mínimo no exige producto ni depósito activos | `servicio/StockServicio.java` | Santiago | Pendiente |
-| H-04 | Baja | Definir el mínimo con un producto inexistente informa «no está habilitado» | `servicio/StockServicio.java` | Santiago | Pendiente |
-| H-05 | Baja | La columna Código no tolera códigos de más de 12 caracteres | `ui/MenuConsultas.java` | Santiago | Pendiente |
-| H-06 | Baja | Mensajes genéricos o técnicos ante errores de la base | `servicio/ReglaNegocioException.java` | Compartido | Corregido en parte (17/11): precio fuera de rango |
-| H-07 | Baja | La aplicación termina con una excepción si se cierra la entrada | Menús (`ui/`) | Compartido | Pendiente |
+| H-03 | Baja | Definir el mínimo no exige producto ni depósito activos | `servicio/StockServicio.java` | Santiago | Corregido (17/11): se rechaza, regla 8 ampliada |
+| H-04 | Baja | Definir el mínimo con un producto inexistente informa «no está habilitado» | `servicio/StockServicio.java` | Santiago | Corregido (17/11) |
+| H-05 | Baja | La columna Código no tolera códigos de más de 12 caracteres | `ui/MenuConsultas.java` | Santiago | Corregido (17/11): el ancho se ajusta al código más largo |
+| H-06 | Baja | Mensajes genéricos o técnicos ante errores de la base | `servicio/ReglaNegocioException.java` | Compartido | Corregido (17/11): precio fuera de rango y duplicados con el campo |
+| H-07 | Baja | La aplicación termina con una excepción si se cierra la entrada | Menús (`ui/`) | Compartido | Corregido (17/11): se captura en `Main` |
 | H-08 | Baja | Los precios con más de dos decimales se redondean sin aviso | `ui/MenuMaestros.java`, `servicio/ProductoServicio.java` | Joaquín | Corregido (17/11) |
 | H-09 | Baja | Al modificar, no se puede borrar la dirección ni la descripción | `ui/MenuMaestros.java` | Joaquín | Pendiente |
 | H-10 | Baja | Los menús de Stock piden todos los datos antes de validar y no muestran listas | `ui/MenuStock.java`, `ui/MenuMaestros.java` | Santiago / Joaquín | Pendiente |

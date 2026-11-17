@@ -1,4 +1,4 @@
-# Modelo relacional del MVP (v0.4)
+# Modelo relacional del MVP (v0.5)
 
 Estado: cerrado — versión 0.4 — última actualización: 04/11/2026 — base: Modelo lógico del MVP v0.1, DER del MVP v0.1, Diseño de base de datos v0.3 (DD)
 
@@ -261,7 +261,7 @@ Por eso `(idProducto, idDeposito)` es clave candidata, y como es la única, es l
 5. La `cantidad` de un STOCK solo cambia mediante movimientos y siempre es el resultado de aplicarlos: los ajustes positivos suman y los negativos restan. El saldo y el movimiento se guardan en la misma transacción, con los bloqueos de la sección 5.4.
 6. Ningún movimiento puede dejar la cantidad del STOCK por debajo de cero (restricción 2 del DER). El servicio lo valida antes de registrar; el `CHECK (cantidad >= 0)` de STOCK es la última barrera.
 7. Habilitar un producto en un depósito crea su STOCK con cantidad 0 y el mínimo indicado, o 0 si no se indica.
-8. Solo se habilita, se ajusta y se compensa con producto y depósito activos (restricción 5 del DER, SR-19).
+8. Solo se habilita, se define el stock mínimo, se ajusta y se compensa con producto y depósito activos (restricción 5 del DER, SR-19). En el mínimo es por coherencia: sobre un producto o depósito inactivo no tendría efecto, porque las consultas no los muestran.
 9. Al dar de alta un producto o cambiarle la categoría, la categoría debe estar activa. Que una categoría pase después a inactiva no impide operar con sus productos.
 10. Un producto solo se da de baja si su stock es cero en todos los depósitos; un depósito, solo si todos sus STOCK están en cero; y siempre queda al menos un depósito activo. Estas comprobaciones también se protegen con los bloqueos de la sección 5.4.
 11. Los movimientos y los registros de auditoría no se modifican ni se eliminan. La base lo respalda con los permisos de la cuenta de la aplicación, que en esas dos tablas solo puede leer e insertar (sección 8.3).
@@ -294,7 +294,7 @@ Sin estos bloqueos se producen, por ejemplo, estas carreras:
 | Alta o cambio de categoría de un producto | La CATEGORIA con `FOR SHARE` (comprobar que está activa) |
 | Habilitar producto en depósito | El PRODUCTO y el DEPOSITO con `FOR SHARE` (activos); después el `INSERT` en STOCK (la clave primaria rechaza la duplicada) |
 | Ajustar stock y compensar movimiento | El PRODUCTO y el DEPOSITO con `FOR SHARE` (activos); el STOCK con `FOR UPDATE` (saldo); después el `UPDATE` del saldo y el `INSERT` del movimiento |
-| Definir stock mínimo | El `UPDATE` de STOCK ya bloquea la fila |
+| Definir stock mínimo | El PRODUCTO y el DEPOSITO con `FOR SHARE` (activos); el STOCK con `FOR UPDATE` (habilitado); después el `UPDATE` del mínimo |
 | Baja de producto | El PRODUCTO con `FOR UPDATE`; después la suma de sus STOCK con `FOR SHARE` |
 | Baja de depósito | **Todos** los DEPOSITO activos con `FOR UPDATE` (`WHERE estadoDeposito = 'activo'`); después la suma de sus STOCK con `FOR SHARE` |
 | Baja de categoría | El `UPDATE` de CATEGORIA ya bloquea la fila |
@@ -473,3 +473,4 @@ Los rechazos de enumerados (1265) se verificaron con el modo estricto por defect
 | 0.2 | Se corrige la definición de clave primaria compuesta (5.2). Se agrega el control de concurrencia (5.4), la sección de normalización (6), el modo estricto (8.2) y la cuenta de la aplicación con permisos mínimos (8.3). El faltante pasa a `GREATEST(stockMinimo − cantidad, 0)`. El borrado de la base sale de `01_schema.sql` y pasa a `00_reiniciar.sql` (8.4). |
 | 0.3 | Se corrige la definición de FNBC: el determinante de toda dependencia no trivial es superclave (6). Se precisan los permisos de las lecturas bloqueantes: `FOR SHARE` pide solo `SELECT` (8.3). `03_usuario_app.sql` quita los permisos anteriores antes de dar los suyos (8.3). Se documenta que los scripts se ejecutan con detención ante el primer error (8.4). |
 | 0.4 | Se aclara que la cuenta de la aplicación tiene que estar sin roles, porque el `REVOKE` no los quita, y cómo comprobarlo y corregirlo (8.3). |
+| 0.5 | Definir el stock mínimo también exige producto y depósito activos (regla 8) y toma sus bloqueos en el orden de la sección 5.4. |

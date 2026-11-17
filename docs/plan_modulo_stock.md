@@ -307,3 +307,35 @@ Los primeros dos son más urgentes. Si Joaquín los tiene antes, perfecto. Si no
 | Etapa 4 — MenuStock | 2-3 horas |
 | Etapa 5 — Integración en Main | 30 min |
 | **Total** | **10-14 horas** |
+
+## 8. Consultas (MenuConsultas)
+
+El plan del MVP (§6.2) dejaba las consultas imprescindibles para «quien libere capacidad primero». Las tomó el módulo Stock (16/11/2026).
+
+| Archivo | Cambio |
+|---|---|
+| `servicio/LineaStock.java` | Nuevo. Una fila de consulta: `Stock` + `Producto` + `Deposito` (el `Stock` solo trae ids; el menú necesita nombres y códigos) |
+| `servicio/ConsultaServicio.java` | Nuevo. Solo lectura, una conexión por consulta. Reutiliza `listarPorDeposito`, `listarPorProducto` y `listarStockBajo` de `StockDao`, y `buscarPorId` de los DAOs de Maestros (con un `Map` para no repetir búsquedas) |
+| `ui/MenuConsultas.java` | Menú completo (antes era un cascarón vacío) |
+| `Main.java` | Crea `ConsultaServicio` y se lo pasa a `MenuConsultas` junto con `ProductoServicio` y `DepositoServicio` |
+
+No se agregó SQL ni se tocaron los DAOs.
+
+| Opción | Qué muestra |
+|---|---|
+| 1. Stock por depósito | Lista los depósitos activos, pide uno y muestra cada producto habilitado: saldo, mínimo, faltante y la marca `BAJO` |
+| 2. Stock total de un producto | Lista los productos activos, pide uno y muestra el desglose por depósito y el **stock total** (suma en `long`) |
+| 3. Productos con stock bajo | Todos los pares con `cantidad < stockMinimo`: producto, depósito, saldo, mínimo y faltante |
+
+Decisiones:
+
+- **Solo activos.** «Inclusión de inactivos en consultas» es del bloque «si alcanza» (plan_mvp.md §3). El servicio filtra por `estaActivo()` del producto y del depósito. Sin ese filtro, un producto dado de baja con mínimo mayor a 0 (saldo 0) aparecería para siempre en el listado de stock bajo. Pedir un id inactivo o inexistente da un error claro.
+- **Atributos derivados** (modelo_relacional_mvp.md §5.3): el total se suma en el servicio; el stock bajo y el faltante los calcula `Stock` (`esBajo()`, `faltante()`), igual que el aviso de §3.6.
+
+Verificado el 16/11/2026 contra MySQL local, con la aplicación real y la entrada por consola redirigida:
+
+| Prueba | Resultado |
+|---|---|
+| Producto en dos depósitos (saldo 3 con mínimo 5, saldo 4 con mínimo 0) | Opción 1: saldo 3, faltante 2, `BAJO`. Opción 2: desglose 3 y 4, total 7 |
+| Producto dado de baja con mínimo 5 y saldo 0 | No aparece en stock bajo; la opción 2 lo rechaza por inactivo |
+| Depósito inexistente, id no numérico | Error «No existe el depósito…» y se vuelve a pedir el número |

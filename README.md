@@ -159,7 +159,13 @@ cp db.properties.example db.properties
 
 y completar `db.contrasena` con la contrasena del `ALTER USER`. El archivo se lee como ISO-8859-1, por eso la contrasena no debe llevar acentos ni enie. `db.properties` esta en el `.gitignore`: nunca se sube al repositorio.
 
-La aplicacion busca `db.properties` en la carpeta desde donde se ejecuta: hay que ejecutarla desde la raiz del repositorio.
+La aplicacion busca `db.properties` en este orden y usa el primero que encuentra:
+
+1. La ruta indicada con `-Ddb.config`, por ejemplo `java -Ddb.config=C:\ruta\db.properties ...`.
+2. La carpeta desde donde se ejecuta.
+3. La raiz del proyecto, que deduce de la ubicacion de las clases compiladas (`target/classes` o el `.jar` en `target/`).
+
+Por eso funciona aunque se ejecute desde el IDE o desde otra carpeta. Si no lo encuentra, el mensaje de error lista las rutas donde busco.
 
 ### 3. Compilar
 

@@ -36,7 +36,8 @@ public class CategoriaServicio {
                 throw e;
             }
         } catch (SQLException e) {
-            throw ReglaNegocioException.desdeSQL(e);
+            throw ReglaNegocioException.desdeSQL(e, ReglaNegocioException.mensajeDuplicado(
+                    "una categoría", "el nombre", nombreLimpio));
         }
     }
 
@@ -60,7 +61,8 @@ public class CategoriaServicio {
                 throw e;
             }
         } catch (SQLException e) {
-            throw ReglaNegocioException.desdeSQL(e);
+            throw ReglaNegocioException.desdeSQL(e, ReglaNegocioException.mensajeDuplicado(
+                    "una categoría", "el nombre", nombreLimpio));
         }
     }
 

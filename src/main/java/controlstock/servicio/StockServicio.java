@@ -72,12 +72,17 @@ public class StockServicio {
                 throw e;
             }
         } catch (SQLException e) {
-            throw ReglaNegocioException.desdeSQL(e);
+            // 1062: otra sesión lo habilitó entre la comprobación y el INSERT.
+            throw ReglaNegocioException.desdeSQL(e,
+                    "El producto ya está habilitado en ese depósito.");
         }
     }
 
     /**
-     * Cambia el stock mínimo de un producto en un depósito.
+     * Cambia el stock mínimo de un producto en un depósito. Igual que al
+     * habilitar y ajustar, el producto y el depósito tienen que existir y estar
+     * activos: en uno inactivo el mínimo no tendría efecto, porque las consultas
+     * no los muestran.
      *
      * @return el Stock actualizado, para que el menú pueda avisar si quedó bajo
      */
@@ -90,6 +95,9 @@ public class StockServicio {
         try (Connection conn = ConexionDB.obtenerConexion()) {
             conn.setAutoCommit(false);
             try {
+                // Orden de bloqueos: PRODUCTO → DEPOSITO → STOCK
+                bloquearProductoActivo(conn, idProducto);
+                bloquearDepositoActivo(conn, idDeposito);
                 Stock stock = bloquearStockHabilitado(conn, idProducto, idDeposito);
                 stock.definirMinimo(nuevoMinimo);
                 stockDao.actualizar(conn, stock);

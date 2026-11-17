@@ -38,7 +38,8 @@ public class DepositoServicio {
                 throw e;
             }
         } catch (SQLException e) {
-            throw ReglaNegocioException.desdeSQL(e);
+            throw ReglaNegocioException.desdeSQL(e, ReglaNegocioException.mensajeDuplicado(
+                    "un depósito", "el nombre", nombreLimpio));
         }
     }
 
@@ -65,7 +66,8 @@ public class DepositoServicio {
                 throw e;
             }
         } catch (SQLException e) {
-            throw ReglaNegocioException.desdeSQL(e);
+            throw ReglaNegocioException.desdeSQL(e, ReglaNegocioException.mensajeDuplicado(
+                    "un depósito", "el nombre", nombreLimpio));
         }
     }
 

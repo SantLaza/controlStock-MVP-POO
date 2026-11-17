@@ -11,9 +11,17 @@ public class ReglaNegocioException extends Exception {
     }
 
     public static ReglaNegocioException desdeSQL(SQLException e) {
+        return desdeSQL(e, "Ya existe un registro con ese valor único.");
+    }
+
+    /**
+     * Igual que {@link #desdeSQL(SQLException)}, pero con el mensaje que se
+     * muestra si el error es un duplicado (1062). El servicio sabe qué campo es
+     * único en cada caso y puede nombrarlo; MySQL solo informa el índice.
+     */
+    public static ReglaNegocioException desdeSQL(SQLException e, String mensajeDuplicado) {
         return switch (e.getErrorCode()) {
-            case 1062 -> new ReglaNegocioException(
-                    "Ya existe un registro con ese valor único.");
+            case 1062 -> new ReglaNegocioException(mensajeDuplicado);
             case 1452 -> new ReglaNegocioException(
                     "No existe el registro referenciado.");
             case 3819 -> new ReglaNegocioException(
@@ -27,6 +35,19 @@ public class ReglaNegocioException extends Exception {
             default -> new ReglaNegocioException(
                     "Error de base de datos: " + e.getMessage());
         };
+    }
+
+    /**
+     * Mensaje de duplicado para un nombre o código único. La base compara sin
+     * distinguir mayúsculas ni tildes (utf8mb4_0900_ai_ci), así que "almacen"
+     * choca con "Almacén": se aclara para que el rechazo no parezca un error.
+     *
+     * @param registro por ejemplo "una categoría"
+     * @param campo    por ejemplo "el nombre"
+     */
+    public static String mensajeDuplicado(String registro, String campo, String valor) {
+        return "Ya existe " + registro + " con " + campo + " '" + valor
+                + "' (no se distinguen mayúsculas ni tildes).";
     }
 
     public static boolean esDeadlock(SQLException e) {

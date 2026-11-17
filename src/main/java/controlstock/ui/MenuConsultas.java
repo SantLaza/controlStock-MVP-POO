@@ -25,6 +25,9 @@ public class MenuConsultas {
     /** Ancho de las columnas de nombres en las tablas. */
     private static final int ANCHO_NOMBRE = 28;
 
+    /** Ancho mínimo de la columna Código; se ensancha si hay códigos más largos. */
+    private static final int ANCHO_CODIGO_MINIMO = 12;
+
     private final Scanner scanner;
     private final ConsultaServicio consultaServicio;
     private final ProductoServicio productoServicio;
@@ -91,13 +94,15 @@ public class MenuConsultas {
             return;
         }
 
+        int anchoCodigo = anchoCodigo(lineas);
         System.out.println("Stock en " + lineas.get(0).getDeposito().getNombre() + ":");
-        System.out.printf("  %-5s %-12s %-" + ANCHO_NOMBRE + "s %8s %8s %9s%n",
+        System.out.printf("  %-5s %-" + anchoCodigo + "s %-" + ANCHO_NOMBRE + "s %8s %8s %9s%n",
                 "Id", "Código", "Producto", "Saldo", "Mínimo", "Faltante");
         for (LineaStock linea : lineas) {
             Producto p = linea.getProducto();
             Stock s = linea.getStock();
-            System.out.printf("  %-5d %-12s %-" + ANCHO_NOMBRE + "s %8d %8d %9d%s%n",
+            System.out.printf("  %-5d %-" + anchoCodigo + "s %-" + ANCHO_NOMBRE
+                            + "s %8d %8d %9d%s%n",
                     p.getIdProducto(), p.getCodigoProducto(), recortar(p.getNombre()),
                     s.getCantidad(), s.getStockMinimo(), s.faltante(), marcaBajo(s));
         }
@@ -147,13 +152,14 @@ public class MenuConsultas {
             return;
         }
 
-        System.out.printf("  %-12s %-" + ANCHO_NOMBRE + "s %-" + ANCHO_NOMBRE
+        int anchoCodigo = anchoCodigo(lineas);
+        System.out.printf("  %-" + anchoCodigo + "s %-" + ANCHO_NOMBRE + "s %-" + ANCHO_NOMBRE
                         + "s %8s %8s %9s%n",
                 "Código", "Producto", "Depósito", "Saldo", "Mínimo", "Faltante");
         for (LineaStock linea : lineas) {
             Producto p = linea.getProducto();
             Stock s = linea.getStock();
-            System.out.printf("  %-12s %-" + ANCHO_NOMBRE + "s %-" + ANCHO_NOMBRE
+            System.out.printf("  %-" + anchoCodigo + "s %-" + ANCHO_NOMBRE + "s %-" + ANCHO_NOMBRE
                             + "s %8d %8d %9d%n",
                     p.getCodigoProducto(), recortar(p.getNombre()),
                     recortar(linea.getDeposito().getNombre()),
@@ -166,6 +172,19 @@ public class MenuConsultas {
     /** Marca las filas con stock bajo en las tablas por depósito y por producto. */
     private String marcaBajo(Stock stock) {
         return stock.esBajo() ? "  BAJO" : "";
+    }
+
+    /**
+     * Ancho de la columna Código: el del código más largo de la tabla, con un
+     * mínimo de {@link #ANCHO_CODIGO_MINIMO}. Los códigos no se recortan porque
+     * identifican al producto; la base los limita a 30 caracteres.
+     */
+    private int anchoCodigo(List<LineaStock> lineas) {
+        int ancho = ANCHO_CODIGO_MINIMO;
+        for (LineaStock linea : lineas) {
+            ancho = Math.max(ancho, linea.getProducto().getCodigoProducto().length());
+        }
+        return ancho;
     }
 
     /** Corta los nombres largos para que no se desarmen las columnas. */

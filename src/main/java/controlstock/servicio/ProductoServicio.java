@@ -58,7 +58,8 @@ public class ProductoServicio {
                 throw e;
             }
         } catch (SQLException e) {
-            throw ReglaNegocioException.desdeSQL(e);
+            throw ReglaNegocioException.desdeSQL(e, ReglaNegocioException.mensajeDuplicado(
+                    "un producto", "el código", codigoLimpio));
         }
     }
 
@@ -109,7 +110,8 @@ public class ProductoServicio {
                 throw e;
             }
         } catch (SQLException e) {
-            throw ReglaNegocioException.desdeSQL(e);
+            throw ReglaNegocioException.desdeSQL(e, ReglaNegocioException.mensajeDuplicado(
+                    "un producto", "el código", codigoLimpio));
         }
     }
 

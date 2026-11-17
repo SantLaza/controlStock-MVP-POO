@@ -23,7 +23,9 @@ public class SesionServicio {
         try (Connection conn = ConexionDB.obtenerConexion()) {
             Usuario usuario = usuarioDao.buscarPorNombre(conn, nombreUsuario);
 
-            if (usuario == null) {
+            // La contraseña se verifica antes que el estado: así, sin conocer la
+            // contraseña, no se puede saber si un usuario existe ni si está inactivo.
+            if (usuario == null || !contrasenaCorrecta(contrasena, usuario.getHashContrasena())) {
                 throw new ReglaNegocioException("Usuario o contraseña incorrectos.");
             }
 
@@ -31,15 +33,27 @@ public class SesionServicio {
                 throw new ReglaNegocioException("El usuario está inactivo.");
             }
 
-            if (!BCrypt.checkpw(contrasena, usuario.getHashContrasena())) {
-                throw new ReglaNegocioException("Usuario o contraseña incorrectos.");
-            }
-
             this.usuarioActual = usuario;
             return usuario;
 
         } catch (SQLException e) {
             throw ReglaNegocioException.desdeSQL(e);
+        }
+    }
+
+    /**
+     * Compara la contraseña con el hash guardado. Un hash vacío o mal formado
+     * (por ejemplo, cargado a mano en la base) hace que BCrypt lance una
+     * excepción: se trata como contraseña incorrecta en lugar de cerrar la app.
+     */
+    private boolean contrasenaCorrecta(String contrasena, String hash) {
+        if (contrasena == null || hash == null) {
+            return false;
+        }
+        try {
+            return BCrypt.checkpw(contrasena, hash);
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            return false;
         }
     }
 

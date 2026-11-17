@@ -2,11 +2,13 @@ package controlstock;
 
 import controlstock.dao.CategoriaDao;
 import controlstock.dao.DepositoDao;
+import controlstock.dao.MovimientoStockDao;
 import controlstock.dao.ProductoDao;
 import controlstock.dao.StockDao;
 import controlstock.dao.UsuarioDao;
 import controlstock.dao.jdbc.CategoriaJdbcDao;
 import controlstock.dao.jdbc.DepositoJdbcDao;
+import controlstock.dao.jdbc.MovimientoStockJdbcDao;
 import controlstock.dao.jdbc.ProductoJdbcDao;
 import controlstock.dao.jdbc.StockJdbcDao;
 import controlstock.dao.jdbc.UsuarioJdbcDao;
@@ -14,6 +16,7 @@ import controlstock.servicio.CategoriaServicio;
 import controlstock.servicio.DepositoServicio;
 import controlstock.servicio.ProductoServicio;
 import controlstock.servicio.SesionServicio;
+import controlstock.servicio.StockServicio;
 import controlstock.ui.MenuConsultas;
 import controlstock.ui.MenuMaestros;
 import controlstock.ui.MenuPrincipal;
@@ -43,15 +46,18 @@ public class Main {
         ProductoDao productoDao = new ProductoJdbcDao();
         DepositoDao depositoDao = new DepositoJdbcDao();
         StockDao stockDao = new StockJdbcDao();
+        MovimientoStockDao movimientoStockDao = new MovimientoStockJdbcDao();
 
         SesionServicio sesionServicio = new SesionServicio(usuarioDao);
         CategoriaServicio categoriaServicio = new CategoriaServicio(categoriaDao, productoDao);
         ProductoServicio productoServicio = new ProductoServicio(productoDao, categoriaDao, stockDao);
         DepositoServicio depositoServicio = new DepositoServicio(depositoDao, stockDao);
+        StockServicio stockServicio = new StockServicio(
+                stockDao, movimientoStockDao, productoDao, depositoDao);
 
         MenuMaestros menuMaestros = new MenuMaestros(scanner, categoriaServicio,
                 productoServicio, depositoServicio);
-        MenuStock menuStock = new MenuStock(scanner);
+        MenuStock menuStock = new MenuStock(scanner, stockServicio, sesionServicio);
         MenuConsultas menuConsultas = new MenuConsultas(scanner);
 
         MenuPrincipal menuPrincipal = new MenuPrincipal(

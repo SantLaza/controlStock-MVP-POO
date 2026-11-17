@@ -248,6 +248,44 @@ Del plan_mvp.md sección 8:
 
 Estos se verifican gracias a `FOR UPDATE`: la segunda sesión espera a que la primera termine y después ve el estado actualizado.
 
+### 5.1 Cómo se prueban
+
+Programa `src/test/java/controlstock/PruebaConcurrencia.java` (con `main`, no es un test JUnit: necesita la base levantada y no tiene que correr en `mvn package`). Usa los servicios reales con la cuenta de `db.properties`.
+
+Para que las dos operaciones se crucen de verdad, una tercera conexión (el «tapón») toma antes con `FOR UPDATE` la fila que las dos bloquean primero (el PRODUCTO en los casos 1 y 3; los dos DEPOSITO en el caso 2). Se lanzan los dos hilos, se comprueba que **los dos quedaron esperando** y recién entonces se suelta el tapón.
+
+| Caso | Datos que usa |
+|---|---|
+| 1 | Producto nuevo en un depósito nuevo, saldo 3; dos ajustes de −2 |
+| 3 | 4 rondas, cada una con un producto nuevo con saldo 0; ajuste +5 y baja a la vez, alternando cuál se lanza primero |
+| 2 | Dos depósitos nuevos. Para que haya exactamente dos activos, los demás se pasan a inactivo con un `UPDATE` directo y se restauran al final (el programa imprime sus ids por si se corta) |
+
+Compilar y ejecutar desde la raíz, en Git Bash sobre Windows (sin Maven; `R` es el repositorio local de Maven; en Linux/Mac el separador del classpath es `:` en vez de `;`):
+
+```bash
+R=~/.m2/repository
+CP="$R/com/mysql/mysql-connector-j/8.3.0/mysql-connector-j-8.3.0.jar;$R/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.jar"
+javac -encoding UTF-8 --release 17 -cp "$CP" -d target/prueba $(find src/main/java src/test/java -name "*.java")
+java -cp "target/prueba;$CP" controlstock.PruebaConcurrencia
+```
+
+Los datos que crea llevan el prefijo `CONC-` y quedan en la base (la cuenta de la aplicación no puede borrar). Se limpian reinstalando con `00` → `03`, antes de la demo.
+
+### 5.2 Resultados (16/11/2026, MySQL 8.0.46, REPEATABLE READ)
+
+Dos ejecuciones completas, todas las comprobaciones OK:
+
+| Caso | Resultado |
+|---|---|
+| 1. Saldo 3, dos ajustes de −2 | Uno pasa; el otro se rechaza con «Stock insuficiente. Saldo actual: 1» (leyó el saldo ya confirmado). Saldo final 1, un solo movimiento nuevo |
+| 2. Dos depósitos activos, dos bajas | Una pasa; la otra se rechaza con «debe quedar al menos un depósito activo». Queda 1 activo |
+| 3. Ajuste +5 y baja del producto | Se dieron los dos órdenes. Si gana la baja, el ajuste se rechaza por producto inactivo (saldo 0). Si gana el ajuste, la baja se rechaza por stock mayor a 0 (activo, saldo 5). Nunca quedó un producto inactivo con existencias |
+
+Observaciones sobre el módulo Maestros (funcionan, pero difieren de `modelo_relacional_mvp.md` §5.4):
+
+- `DepositoServicio.darDeBaja` bloquea primero su propio depósito y después todos los activos (`contarActivos` con `FOR UPDATE`). Con dos bajas simultáneas eso puede producir un deadlock (1213), que se resuelve con el reintento (el resultado de la prueba es correcto, pero no se midió si el reintento llegó a usarse). La §5.4 indica bloquear primero **todos** los activos, lo que evita el deadlock.
+- `ProductoServicio.darDeBaja` consulta el STOCK con un `SELECT` común (la §5.4 pide `FOR SHARE`). Hoy da bien porque la foto de la transacción se toma después de esperar el bloqueo del producto, pero si antes se agregara otra lectura común, la baja vería un saldo viejo.
+
 ## 6. Dependencias con el módulo Maestros
 
 | Lo que necesito de Joaquín | Para qué | Mientras tanto |

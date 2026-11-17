@@ -176,8 +176,8 @@ Prioridad **media**: contradice una regla documentada. Prioridad **baja**: es de
 | H-06 | Baja | Mensajes genéricos o técnicos ante errores de la base | `servicio/ReglaNegocioException.java` | Compartido | Corregido (17/11): precio fuera de rango y duplicados con el campo |
 | H-07 | Baja | La aplicación termina con una excepción si se cierra la entrada | Menús (`ui/`) | Compartido | Corregido (17/11): se captura en `Main` |
 | H-08 | Baja | Los precios con más de dos decimales se redondean sin aviso | `ui/MenuMaestros.java`, `servicio/ProductoServicio.java` | Joaquín | Corregido (17/11) |
-| H-09 | Baja | Al modificar, no se puede borrar la dirección ni la descripción | `ui/MenuMaestros.java` | Joaquín | Pendiente |
-| H-10 | Baja | Los menús de Stock piden todos los datos antes de validar y no muestran listas | `ui/MenuStock.java`, `ui/MenuMaestros.java` | Santiago / Joaquín | Pendiente |
+| H-09 | Baja | Al modificar, no se puede borrar la dirección ni la descripción | `ui/MenuMaestros.java` | Joaquín | Corregido (17/11): `-` borra el valor |
+| H-10 | Baja | Los menús de Stock piden todos los datos antes de validar y no muestran listas | `ui/MenuStock.java`, `ui/MenuMaestros.java` | Santiago / Joaquín | Corregido (17/11): listas y validación al ingresar cada dato |
 
 Las correcciones del 17/11 siguen `docs/plan_correcciones_maestros.md`, que tiene el diseño y la verificación. Las secciones 3 y 4 describen el comportamiento del commit `63534b3`, previo a esas correcciones.
 

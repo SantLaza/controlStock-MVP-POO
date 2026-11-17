@@ -13,6 +13,7 @@ import controlstock.dao.jdbc.ProductoJdbcDao;
 import controlstock.dao.jdbc.StockJdbcDao;
 import controlstock.dao.jdbc.UsuarioJdbcDao;
 import controlstock.servicio.CategoriaServicio;
+import controlstock.servicio.ConsultaServicio;
 import controlstock.servicio.DepositoServicio;
 import controlstock.servicio.ProductoServicio;
 import controlstock.servicio.SesionServicio;
@@ -54,11 +55,14 @@ public class Main {
         DepositoServicio depositoServicio = new DepositoServicio(depositoDao, stockDao);
         StockServicio stockServicio = new StockServicio(
                 stockDao, movimientoStockDao, productoDao, depositoDao);
+        ConsultaServicio consultaServicio = new ConsultaServicio(
+                stockDao, productoDao, depositoDao);
 
         MenuMaestros menuMaestros = new MenuMaestros(scanner, categoriaServicio,
                 productoServicio, depositoServicio);
         MenuStock menuStock = new MenuStock(scanner, stockServicio, sesionServicio);
-        MenuConsultas menuConsultas = new MenuConsultas(scanner);
+        MenuConsultas menuConsultas = new MenuConsultas(scanner, consultaServicio,
+                productoServicio, depositoServicio);
 
         MenuPrincipal menuPrincipal = new MenuPrincipal(
                 scanner, sesionServicio, menuMaestros, menuStock, menuConsultas);

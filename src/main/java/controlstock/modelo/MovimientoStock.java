@@ -102,6 +102,6 @@ public class MovimientoStock {
     @Override
     public String toString() {
         return "[" + idMovimiento + "] " + tipoMovimiento.getValor()
-                + " x" + cantidad + " — " + motivo;
+                + " x" + cantidad + " - " + motivo;
     }
 }

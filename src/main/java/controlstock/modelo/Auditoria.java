@@ -83,6 +83,6 @@ public class Auditoria {
     @Override
     public String toString() {
         return "[" + idAuditoria + "] " + accion.getValor() + " en "
-                + entidadAfectada.getValor() + " — " + descripcionCambio;
+                + entidadAfectada.getValor() + " - " + descripcionCambio;
     }
 }

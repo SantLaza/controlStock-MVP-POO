@@ -228,7 +228,7 @@ public class MenuStock {
             Stock s = linea.getStock();
             System.out.println("  [" + linea.getDeposito().getIdDeposito() + "] "
                     + linea.getDeposito().getNombre()
-                    + " — saldo " + s.getCantidad() + ", mínimo " + s.getStockMinimo());
+                    + " - saldo " + s.getCantidad() + ", mínimo " + s.getStockMinimo());
         }
         LineaStock elegida = elegirPorId("Id del depósito (0 para cancelar): ", lineas,
                 l -> l.getDeposito().getIdDeposito(), "Ese depósito no está en la lista.");

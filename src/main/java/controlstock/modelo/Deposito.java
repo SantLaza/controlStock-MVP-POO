@@ -46,7 +46,7 @@ public class Deposito extends EntidadMaestra {
     @Override
     public String toString() {
         return "[" + idDeposito + "] " + nombreDeposito
-                + (direccion != null ? " — " + direccion : "")
+                + (direccion != null ? " - " + direccion : "")
                 + " (" + getEstado().getValor() + ")";
     }
 }
